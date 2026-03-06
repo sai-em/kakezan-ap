@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>かけ算スタンプ</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5c7a6e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="かけ算スタンプ">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
   :root{
     --g1:#5c7a6e;--g2:#7fa898;--g3:#a8c5bb;
@@ -647,6 +653,13 @@ document.querySelectorAll('#qGoalBtns .seg-btn').forEach(btn=>{
 // --- INIT ---
 startNewSet();
 autoLogin();
+
+// --- PWA Service Worker ---
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/kakzan-stamp/sw.js');
+  });
+}
 </script>
 </body>
 </html>
