@@ -152,13 +152,19 @@
   .s-bar-bg { height: 6px; background: var(--g5); border-radius: 99px; overflow: hidden; margin-bottom: 18px; }
   .s-bar-fill { height: 100%; background: linear-gradient(90deg, var(--g1), var(--g3)); border-radius: 99px; transition: width .4s; }
   .stamp-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .stamp-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
   .stamp-cell {
-    aspect-ratio: 1; border-radius: 12px; border: 2px dashed var(--g4);
+    width: 100%; aspect-ratio: 1; border-radius: 12px; border: 2px dashed var(--g4);
     background: var(--g6); display: flex; align-items: center;
     justify-content: center; font-size: 1.2rem; overflow: hidden;
   }
   .stamp-cell.filled { border-color: var(--g2); background: var(--g5); animation: pop .3s ease; }
   .stamp-cell img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+  .stamp-score {
+    font-size: 0.6rem; font-weight: 800; color: var(--muted);
+    letter-spacing: .02em; line-height: 1; white-space: nowrap;
+  }
+  .stamp-score.perfect { color: var(--g1); }
   @keyframes pop { 0%{transform:scale(0)} 70%{transform:scale(1.2)} 100%{transform:scale(1)} }
 
   .custom-preview {
@@ -229,6 +235,15 @@
   }
   .score-sep { color: var(--g3); font-size: 1.4rem; }
   .score-label { font-size: 0.72rem; font-weight: 700; color: var(--muted); letter-spacing: .06em; margin-left: 4px; align-self: center; }
+
+  .stamp-count-btn {
+    flex: 1; padding: 10px; border-radius: 10px;
+    border: 1.5px solid var(--g4); background: #fff;
+    color: var(--muted); font-size: 0.88rem; font-weight: 800;
+    cursor: pointer; transition: all .2s;
+  }
+  .stamp-count-btn.active { border-color: var(--g1); background: var(--g5); color: var(--g1); }
+  .stamp-count-btn:hover { border-color: var(--g2); color: var(--g1); }
 
   .save-status { text-align: center; font-size: 0.7rem; color: var(--muted); margin-top: 10px; min-height: 16px; }
 </style>
@@ -330,6 +345,14 @@
     </label>
     <input type="file" id="fileInput" accept="image/*">
     <button class="reset-btn" id="resetStampBtn">デフォルトにもどす</button>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--g4);">
+      <p class="custom-label" style="margin-bottom:10px;">ゴールのスタンプ数</p>
+      <div style="display:flex;gap:8px;">
+        <button class="stamp-count-btn active" data-count="10">10こ</button>
+        <button class="stamp-count-btn" data-count="20">20こ</button>
+        <button class="stamp-count-btn" data-count="30">30こ</button>
+      </div>
+    </div>
     <div class="save-status" id="saveStatusCustom"></div>
   </div>
 </div>
@@ -375,7 +398,8 @@ let stamps = 0, customSrc = null, qNum = 0, correctAns = 0, answered = false;
 let currentUserId = null, currentUserName = null;
 let isRegisterMode = true;
 let scoreCorrect = 0, scoreTotal = 0;
-let scoreHistory = []; // [{correct, total}] スタンプごとの得点履歴
+let scoreHistory = [];
+let stampGoal = 10; // デフォルト10個 // [{correct, total}] スタンプごとの得点履歴
 
 // --- LOGIN UI ---
 function showLoginModal() {
@@ -432,7 +456,7 @@ async function handleLogin() {
   } catch(e) { errEl.textContent = 'エラーがおきたよ。もういちどためしてね'; console.error(e); }
 }
 
-function loginSuccess(uid, name, s, cs, sh) {
+function loginSuccess(uid, name, s, cs, sh, sg) {
   currentUserId = uid;
   currentUserName = name;
   stamps = s;
@@ -452,7 +476,8 @@ function loginSuccess(uid, name, s, cs, sh) {
 document.getElementById('authBtn').addEventListener('click', () => {
   if (currentUserId) {
     currentUserId = null; currentUserName = null;
-    stamps = 0; customSrc = null;
+    stamps = 0; customSrc = null; scoreHistory = [];
+    localStorage.removeItem('savedUid');
     document.getElementById('authAvatar').innerHTML = '<i class="fa-regular fa-circle-user"></i>';
     document.getElementById('authName').textContent = 'ログインしていません';
     document.getElementById('authName').style.color = 'var(--muted)';
@@ -470,7 +495,7 @@ async function saveUserData() {
   setSaveStatus('saving');
   try {
     await db.collection('users').doc(currentUserId).update({
-      stamps, customStampUrl: customSrc || null, scoreHistory
+      stamps, customStampUrl: customSrc || null, scoreHistory, stampGoal
     });
     setSaveStatus('saved');
   } catch(e) { setSaveStatus('error'); console.error(e); }
@@ -683,6 +708,23 @@ function flashScreen() {
   document.body.appendChild(f); setTimeout(() => f.remove(), 600);
 }
 
+// --- STAMP COUNT ---
+function updateStampCountUI() {
+  document.querySelectorAll('.stamp-count-btn').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.count) === stampGoal);
+  });
+}
+document.querySelectorAll('.stamp-count-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    stampGoal = parseInt(btn.dataset.count);
+    stamps = Math.min(stamps, stampGoal);
+    scoreHistory = scoreHistory.slice(-stampGoal);
+    updateStampCountUI();
+    await saveUserData();
+    renderStamps();
+  });
+});
+
 // --- EVENT LISTENERS ---
 document.getElementById('danSelect').addEventListener('change', startNewSet);
 document.getElementById('nextBtn').addEventListener('click', nextQuestion);
@@ -699,8 +741,23 @@ document.getElementById('tab-stamp').addEventListener('click', e => showTab('sta
 document.getElementById('tab-custom').addEventListener('click', e => showTab('custom', e.currentTarget));
 
 // --- INIT ---
+async function autoLogin() {
+  const savedUid = localStorage.getItem('savedUid');
+  if (savedUid) {
+    try {
+      const snap = await db.collection('users').doc(savedUid).get();
+      if (snap.exists) {
+        const d = snap.data();
+        loginSuccess(savedUid, d.name, d.stamps || 0, d.customStampUrl || null, d.scoreHistory || [], d.stampGoal || 10);
+        return;
+      }
+    } catch(e) { console.error(e); }
+    localStorage.removeItem('savedUid');
+  }
+  showLoginModal();
+}
 startNewSet();
-showLoginModal();
+autoLogin();
 </script>
 </body>
 </html>
