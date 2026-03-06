@@ -521,7 +521,7 @@ document.getElementById('resetStampBtn').addEventListener('click', async () => {
 
 // --- QUIZ ---
 function rnd(n) { return Math.floor(Math.random() * n) + 1; }
-function startNewSet() { qNum = 0; scoreCorrect = 0; scoreTotal = 0; updateScore(); nextQuestion(); }
+function startNewSet() { qNum = 0; scoreCorrect = 0; scoreTotal = 0; nextQuestion(); }
 
 function nextQuestion() {
   if (qNum >= TOTAL_Q) {
@@ -585,12 +585,6 @@ function answer(btn, val) {
   }
   document.getElementById('nextBtn').style.display = 'block';
   scoreTotal++;
-  updateScore();
-}
-
-function updateScore() {
-  document.getElementById('scoreCorrect').textContent = scoreCorrect;
-  document.getElementById('scoreTotal').textContent = scoreTotal;
 }
 
 // --- TABS ---
