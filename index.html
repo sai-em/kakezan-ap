@@ -22,6 +22,7 @@
   header h1 span { color: var(--g1); }
   header p { font-size: 0.72rem; color: var(--muted); margin-top: 3px; letter-spacing: .12em; text-transform: uppercase; }
 
+  /* AUTH BAR */
   .auth-bar {
     max-width: 400px; margin: 0 auto 16px;
     display: flex; align-items: center; justify-content: space-between;
@@ -29,8 +30,12 @@
     box-shadow: 0 2px 12px #5c7a6e10;
   }
   .auth-user { display: flex; align-items: center; gap: 10px; }
-  .auth-user img { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--g4); }
-  .auth-user span { font-size: 0.82rem; font-weight: 700; color: var(--text); }
+  .auth-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--g4); display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; font-weight: 800; color: var(--g1);
+  }
+  .auth-user span { font-size: 0.85rem; font-weight: 700; color: var(--text); }
   .auth-btn {
     padding: 7px 16px; border-radius: 10px; border: none;
     font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all .2s;
@@ -40,6 +45,48 @@
   .auth-btn.logout { background: var(--g5); color: var(--muted); border: 1.5px solid var(--g4); }
   .auth-btn.logout:hover { color: var(--g1); border-color: var(--g2); }
 
+  /* LOGIN MODAL */
+  .login-overlay {
+    display: none; position: fixed; inset: 0;
+    background: #1a2e2899; z-index: 200;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(6px);
+  }
+  .login-overlay.show { display: flex; }
+  .login-box {
+    background: #fff; border-radius: 26px; padding: 32px 28px;
+    max-width: 320px; width: 92%; text-align: center;
+    box-shadow: 0 20px 60px #0002;
+    animation: modalPop .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  .login-box h2 { font-size: 1.15rem; font-weight: 900; color: var(--text); margin-bottom: 4px; }
+  .login-box .sub { font-size: 0.78rem; color: var(--muted); margin-bottom: 20px; }
+  .login-tabs { display: flex; background: var(--g5); border-radius: 10px; padding: 4px; margin-bottom: 20px; gap: 4px; }
+  .login-tab {
+    flex: 1; padding: 8px; border-radius: 8px; border: none;
+    font-size: 0.8rem; font-weight: 700; cursor: pointer;
+    background: transparent; color: var(--muted); transition: all .2s;
+  }
+  .login-tab.active { background: #fff; color: var(--g1); box-shadow: 0 1px 6px #0001; }
+  .login-field { margin-bottom: 12px; text-align: left; }
+  .login-field label { font-size: 0.72rem; font-weight: 700; color: var(--muted); letter-spacing: .06em; display: block; margin-bottom: 5px; }
+  .login-field input {
+    width: 100%; padding: 11px 14px; border-radius: 10px;
+    border: 1.5px solid var(--g4); font-size: 1rem; color: var(--text);
+    background: var(--g6); outline: none; transition: border .2s;
+    font-weight: 700; letter-spacing: .1em;
+  }
+  .login-field input:focus { border-color: var(--g2); }
+  .login-error { font-size: 0.78rem; color: #b07070; min-height: 18px; margin-bottom: 10px; }
+  .login-submit {
+    width: 100%; padding: 13px; border-radius: 12px; border: none;
+    background: linear-gradient(90deg, var(--g1), var(--g2));
+    color: #fff; font-size: 0.95rem; font-weight: 800;
+    cursor: pointer; letter-spacing: .04em; transition: opacity .2s;
+  }
+  .login-submit:hover { opacity: .88; }
+
+  /* TABS */
   .tabs {
     display: flex; gap: 5px; margin-bottom: 20px;
     background: var(--g4); padding: 5px; border-radius: 14px;
@@ -87,7 +134,7 @@
   .choice-btn.correct { background: #d4ede5; border-color: var(--g1); color: var(--accent); }
   .choice-btn.wrong   { background: #f5e0e0; border-color: #b07070; color: #7a3a3a; }
 
-  .feedback { text-align: center; font-size: 0.95rem; font-weight: 700; min-height: 24px; margin-bottom: 12px; letter-spacing: .02em; }
+  .feedback { text-align: center; font-size: 0.95rem; font-weight: 700; min-height: 24px; margin-bottom: 12px; }
   .feedback.ok { color: var(--g1); }
   .feedback.ng { color: #b07070; }
 
@@ -120,12 +167,12 @@
     font-size: 2rem; margin: 0 auto 12px; overflow: hidden; background: var(--g5);
   }
   .custom-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
-  .custom-label { font-size: 0.78rem; color: var(--muted); text-align: center; margin-bottom: 16px; letter-spacing: .04em; }
+  .custom-label { font-size: 0.78rem; color: var(--muted); text-align: center; margin-bottom: 16px; }
   .upload-btn {
     display: block; width: 100%; padding: 13px; border-radius: 14px;
     border: 1.5px solid var(--g2); background: #fff; color: var(--g1);
     font-size: 0.92rem; font-weight: 800; text-align: center;
-    cursor: pointer; letter-spacing: .04em; transition: all .2s; margin-bottom: 10px;
+    cursor: pointer; transition: all .2s; margin-bottom: 10px;
   }
   .upload-btn:hover { background: var(--g5); }
   #fileInput { display: none; }
@@ -136,6 +183,7 @@
   }
   .reset-btn:hover { border-color: var(--g3); color: var(--g1); }
 
+  /* MODALS */
   .modal-overlay {
     display: none; position: fixed; inset: 0; background: #1a2e2888;
     z-index: 100; align-items: center; justify-content: center;
@@ -146,7 +194,7 @@
     background: #fff; border-radius: 26px; padding: 36px 28px;
     max-width: 310px; width: 90%; text-align: center;
     animation: modalPop .4s cubic-bezier(.34,1.56,.64,1);
-    box-shadow: 0 20px 60px #2c3e3722; position: relative; overflow: hidden;
+    box-shadow: 0 20px 60px #2c3e3722;
   }
   @keyframes modalPop { from{transform:scale(.4) rotate(-6deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
   .modal-icon { font-size: 3.2rem; margin-bottom: 8px; }
@@ -156,39 +204,25 @@
   .modal-btn {
     width: 100%; padding: 14px; border-radius: 14px; border: none;
     background: linear-gradient(90deg, var(--g1), var(--g2));
-    color: #fff; font-size: 0.95rem; font-weight: 800; cursor: pointer; letter-spacing: .05em;
+    color: #fff; font-size: 0.95rem; font-weight: 800; cursor: pointer;
     animation: btnPulse 1s ease-in-out infinite;
   }
   @keyframes btnPulse { 0%,100%{box-shadow:0 0 0 0 #5c7a6e44} 50%{box-shadow:0 0 0 8px #5c7a6e00} }
   .bigstar-icon { font-size: 3.5rem; margin-bottom: 8px; animation: pulse 1.2s ease-in-out infinite; display: inline-block; }
   @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
 
+  /* EFFECTS */
   .confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 99; }
-  .confetti-piece {
-    position: absolute; top: -20px; width: 10px; height: 10px;
-    border-radius: 2px; animation: confettiFall linear forwards;
-  }
-  @keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
-  .stamp-flash {
-    position: fixed; inset: 0; z-index: 98;
-    background: radial-gradient(circle, #a8c5bb88 0%, transparent 70%);
-    pointer-events: none; opacity: 0; animation: flashIn .5s ease forwards;
-  }
+  .confetti-piece { position: absolute; top: -20px; border-radius: 2px; animation: confettiFall linear forwards; }
+  @keyframes confettiFall { 0%{transform:translateY(0) rotate(0);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+  .stamp-flash { position: fixed; inset: 0; z-index: 98; background: radial-gradient(circle,#a8c5bb88 0%,transparent 70%); pointer-events: none; opacity: 0; animation: flashIn .5s ease forwards; }
   @keyframes flashIn { 0%{opacity:0} 30%{opacity:1} 100%{opacity:0} }
-  .correct-burst {
-    position: fixed; pointer-events: none; z-index: 97;
-    font-size: 1.6rem; font-weight: 900; color: var(--g1); white-space: nowrap;
-    animation: burstUp .7s cubic-bezier(.22,.68,0,1.4) forwards;
-  }
-  @keyframes burstUp { 0%{transform:translateY(0) scale(0.5);opacity:1} 60%{transform:translateY(-60px) scale(1.15);opacity:1} 100%{transform:translateY(-90px) scale(1);opacity:0} }
-  .mini-confetti-piece {
-    position: fixed; pointer-events: none; z-index: 96;
-    width: 7px; height: 7px; border-radius: 2px;
-    animation: miniFall linear forwards;
-  }
+  .correct-burst { position: fixed; pointer-events: none; z-index: 97; font-size: 1.6rem; font-weight: 900; color: var(--g1); white-space: nowrap; animation: burstUp .7s cubic-bezier(.22,.68,0,1.4) forwards; }
+  @keyframes burstUp { 0%{transform:translateY(0) scale(.5);opacity:1} 60%{transform:translateY(-60px) scale(1.15);opacity:1} 100%{transform:translateY(-90px) scale(1);opacity:0} }
+  .mini-confetti-piece { position: fixed; pointer-events: none; z-index: 96; width: 7px; height: 7px; border-radius: 2px; animation: miniFall linear forwards; }
   @keyframes miniFall { 0%{opacity:1} 100%{opacity:0;transform:translate(var(--tx),var(--ty)) rotate(540deg)} }
 
-  .save-status { text-align: center; font-size: 0.7rem; color: var(--muted); margin-top: 10px; letter-spacing: .04em; min-height: 16px; }
+  .save-status { text-align: center; font-size: 0.7rem; color: var(--muted); margin-top: 10px; min-height: 16px; }
 </style>
 </head>
 <body>
@@ -198,22 +232,45 @@
   <p>Multiplication Stamp</p>
 </header>
 
-<div class="auth-bar" id="authBar">
+<!-- AUTH BAR -->
+<div class="auth-bar">
   <div class="auth-user" id="authUser">
-    <i class="fa-regular fa-circle-user" style="font-size:1.6rem;color:var(--g3)"></i>
-    <span style="color:var(--muted)">ログインしていません</span>
+    <div class="auth-avatar" id="authAvatar"><i class="fa-regular fa-circle-user"></i></div>
+    <span id="authName" style="color:var(--muted)">ログインしていません</span>
   </div>
-  <button class="auth-btn login" id="authBtn">
-    <i class="fa-brands fa-google"></i> ログイン
-  </button>
+  <button class="auth-btn login" id="authBtn">ログイン</button>
 </div>
 
+<!-- LOGIN MODAL -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h2>かけ算スタンプ</h2>
+    <p class="sub">ニックネームと4けたのあんごうを いれてね</p>
+    <div class="login-tabs">
+      <button class="login-tab active" id="tabRegister">はじめて</button>
+      <button class="login-tab" id="tabLogin">もどる</button>
+    </div>
+    <div class="login-field">
+      <label>ニックネーム</label>
+      <input type="text" id="inputName" placeholder="たろう" maxlength="10">
+    </div>
+    <div class="login-field">
+      <label>4けたのあんごう</label>
+      <input type="password" id="inputPin" placeholder="0000" maxlength="4" inputmode="numeric">
+    </div>
+    <div class="login-error" id="loginError"></div>
+    <button class="login-submit" id="loginSubmit">はじめる！</button>
+  </div>
+</div>
+
+<!-- TABS -->
 <div class="tabs">
   <button class="tab active" id="tab-quiz"><i class="fa-regular fa-pen-to-square"></i>もんだい</button>
   <button class="tab" id="tab-stamp"><i class="fa-regular fa-star"></i>スタンプ</button>
   <button class="tab" id="tab-custom"><i class="fa-regular fa-image"></i>カスタム</button>
 </div>
 
+<!-- QUIZ -->
 <div class="panel active" id="panel-quiz">
   <div class="card">
     <div class="dan-row">
@@ -238,6 +295,7 @@
   </div>
 </div>
 
+<!-- STAMP -->
 <div class="panel" id="panel-stamp">
   <div class="card">
     <div class="stamp-meta">
@@ -250,6 +308,7 @@
   </div>
 </div>
 
+<!-- CUSTOM -->
 <div class="panel" id="panel-custom">
   <div class="card">
     <div class="custom-preview" id="customPreview">
@@ -265,6 +324,7 @@
   </div>
 </div>
 
+<!-- SET COMPLETE MODAL -->
 <div class="modal-overlay" id="setModal">
   <div class="modal">
     <div class="modal-icon"><i class="fa-regular fa-circle-check" style="color:var(--g1)"></i></div>
@@ -274,6 +334,7 @@
   </div>
 </div>
 
+<!-- BIG STAR MODAL -->
 <div class="modal-overlay" id="bigModal">
   <div class="modal">
     <div class="bigstar-icon"><i class="fa-regular fa-star" style="color:var(--g1)"></i></div>
@@ -285,83 +346,122 @@
 
 <!-- Firebase compat SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
-// --- FIREBASE INIT ---
-const firebaseConfig = {
+firebase.initializeApp({
   apiKey: "AIzaSyAo74OyBK2D0aSkpju1kPOVThKU8N_kRWg",
   authDomain: "chiiku-f0712.firebaseapp.com",
   projectId: "chiiku-f0712",
   storageBucket: "chiiku-f0712.firebasestorage.app",
   messagingSenderId: "939920994832",
-  appId: "1:939920994832:web:c0cba8ffaea6fc81491095",
-  measurementId: "G-QL23RSFRTZ"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+  appId: "1:939920994832:web:c0cba8ffaea6fc81491095"
+});
 const db = firebase.firestore();
-const provider = new firebase.auth.GoogleAuthProvider();
 
 // --- STATE ---
 const TOTAL_Q = 30;
 let stamps = 0, customSrc = null, qNum = 0, correctAns = 0, answered = false;
-let currentUser = null;
+let currentUserId = null, currentUserName = null;
+let isRegisterMode = true;
 
-// --- AUTH ---
-document.getElementById('authBtn').addEventListener('click', () => {
-  if (currentUser) {
-    auth.signOut();
-  } else {
-    auth.signInWithPopup(provider).catch(err => console.error('Login error:', err));
-  }
+// --- LOGIN UI ---
+function showLoginModal() {
+  document.getElementById('loginOverlay').classList.add('show');
+  document.getElementById('inputName').focus();
+}
+function hideLoginModal() {
+  document.getElementById('loginOverlay').classList.remove('show');
+  document.getElementById('loginError').textContent = '';
+}
+
+document.getElementById('tabRegister').addEventListener('click', () => {
+  isRegisterMode = true;
+  document.getElementById('tabRegister').classList.add('active');
+  document.getElementById('tabLogin').classList.remove('active');
+  document.getElementById('loginSubmit').textContent = 'はじめる！';
+  document.getElementById('loginError').textContent = '';
+});
+document.getElementById('tabLogin').addEventListener('click', () => {
+  isRegisterMode = false;
+  document.getElementById('tabLogin').classList.add('active');
+  document.getElementById('tabRegister').classList.remove('active');
+  document.getElementById('loginSubmit').textContent = 'もどる！';
+  document.getElementById('loginError').textContent = '';
 });
 
-auth.onAuthStateChanged(async user => {
-  currentUser = user;
-  const userEl = document.getElementById('authUser');
-  const btn = document.getElementById('authBtn');
-  if (user) {
-    userEl.innerHTML = `<img src="${user.photoURL}" referrerpolicy="no-referrer"><span>${user.displayName}</span>`;
-    btn.className = 'auth-btn logout';
-    btn.textContent = 'ログアウト';
-    await loadUserData();
-  } else {
-    userEl.innerHTML = `<i class="fa-regular fa-circle-user" style="font-size:1.6rem;color:var(--g3)"></i><span style="color:var(--muted)">ログインしていません</span>`;
-    btn.className = 'auth-btn login';
-    btn.innerHTML = '<i class="fa-brands fa-google"></i> ログイン';
-    stamps = parseInt(localStorage.getItem('stamps') || '0');
-    customSrc = localStorage.getItem('customStamp') || null;
-    renderStamps(); updatePreview();
-  }
-});
+document.getElementById('loginSubmit').addEventListener('click', handleLogin);
+document.getElementById('inputPin').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
 
-// --- FIRESTORE ---
-async function loadUserData() {
+async function handleLogin() {
+  const name = document.getElementById('inputName').value.trim();
+  const pin  = document.getElementById('inputPin').value.trim();
+  const errEl = document.getElementById('loginError');
+
+  if (!name) { errEl.textContent = 'ニックネームをいれてね'; return; }
+  if (!/^\d{4}$/.test(pin)) { errEl.textContent = 'あんごうは4けたのすうじだよ'; return; }
+
+  // IDはニックネームをそのままキーに（小文字化）
+  const uid = 'user_' + name.toLowerCase().replace(/\s+/g, '_');
+  const docRef = db.collection('users').doc(uid);
+
   try {
-    const snap = await db.collection('users').doc(currentUser.uid).get();
-    if (snap.exists) {
-      const d = snap.data();
-      stamps = d.stamps || 0;
-      customSrc = d.customStampUrl || null;
+    const snap = await docRef.get();
+    if (isRegisterMode) {
+      if (snap.exists) { errEl.textContent = 'そのなまえはもうつかわれているよ'; return; }
+      await docRef.set({ name, pin, stamps: 0, customStampUrl: null });
+      loginSuccess(uid, name, 0, null);
     } else {
-      stamps = 0; customSrc = null;
+      if (!snap.exists) { errEl.textContent = 'そのなまえはみつからないよ'; return; }
+      const d = snap.data();
+      if (d.pin !== pin) { errEl.textContent = 'あんごうがちがうよ'; return; }
+      loginSuccess(uid, d.name, d.stamps || 0, d.customStampUrl || null);
     }
-  } catch(e) { console.error('Load error:', e); }
+  } catch(e) { errEl.textContent = 'エラーがおきたよ。もういちどためしてね'; console.error(e); }
+}
+
+function loginSuccess(uid, name, s, cs) {
+  currentUserId = uid;
+  currentUserName = name;
+  stamps = s;
+  customSrc = cs;
+  hideLoginModal();
+  // update auth bar
+  const initial = name.charAt(0).toUpperCase();
+  document.getElementById('authAvatar').textContent = initial;
+  document.getElementById('authName').textContent = name;
+  document.getElementById('authName').style.color = 'var(--text)';
+  const btn = document.getElementById('authBtn');
+  btn.textContent = 'ログアウト';
+  btn.className = 'auth-btn logout';
   renderStamps(); updatePreview();
 }
 
-async function saveUserData() {
-  if (!currentUser) {
-    localStorage.setItem('stamps', stamps);
-    return;
+document.getElementById('authBtn').addEventListener('click', () => {
+  if (currentUserId) {
+    currentUserId = null; currentUserName = null;
+    stamps = 0; customSrc = null;
+    document.getElementById('authAvatar').innerHTML = '<i class="fa-regular fa-circle-user"></i>';
+    document.getElementById('authName').textContent = 'ログインしていません';
+    document.getElementById('authName').style.color = 'var(--muted)';
+    const btn = document.getElementById('authBtn');
+    btn.textContent = 'ログイン'; btn.className = 'auth-btn login';
+    renderStamps(); updatePreview();
+  } else {
+    showLoginModal();
   }
+});
+
+// --- FIRESTORE SAVE ---
+async function saveUserData() {
+  if (!currentUserId) return;
   setSaveStatus('saving');
   try {
-    await db.collection('users').doc(currentUser.uid).set({ stamps, customStampUrl: customSrc || null }, { merge: true });
+    await db.collection('users').doc(currentUserId).update({
+      stamps, customStampUrl: customSrc || null
+    });
     setSaveStatus('saved');
-  } catch(e) { setSaveStatus('error'); console.error('Save error:', e); }
+  } catch(e) { setSaveStatus('error'); console.error(e); }
 }
 
 function setSaveStatus(state) {
@@ -379,10 +479,10 @@ function compressImage(file, maxSize = 400) {
       const img = new Image();
       img.onload = () => {
         const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
-        const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
         const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
         resolve(canvas.toDataURL('image/jpeg', 0.7));
       };
       img.src = ev.target.result;
@@ -393,25 +493,19 @@ function compressImage(file, maxSize = 400) {
 
 document.getElementById('fileInput').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
-  setSaveStatus('saving');
-  try {
-    customSrc = await compressImage(file);
-    if (currentUser) await saveUserData();
-    else { localStorage.setItem('customStamp', customSrc); setSaveStatus('saved'); }
-  } catch(err) { setSaveStatus('error'); }
+  customSrc = await compressImage(file);
+  await saveUserData();
   updatePreview(); renderStamps();
 });
 
 document.getElementById('resetStampBtn').addEventListener('click', async () => {
   customSrc = null;
-  if (currentUser) await saveUserData();
-  else localStorage.removeItem('customStamp');
+  await saveUserData();
   updatePreview(); renderStamps();
 });
 
 // --- QUIZ ---
 function rnd(n) { return Math.floor(Math.random() * n) + 1; }
-
 function startNewSet() { qNum = 0; nextQuestion(); }
 
 function nextQuestion() {
@@ -534,24 +628,22 @@ function miniCorrectEffect(btn) {
     setTimeout(() => p.remove(), 900);
   }
 }
-
 function launchConfetti() {
   const wrap = document.createElement('div');
   wrap.className = 'confetti-wrap'; document.body.appendChild(wrap);
-  const colors = ['#5c7a6e','#a8c5bb','#f9c74f','#f8961e','#f94144','#90be6d','#43aa8b','#ffffff'];
+  const colors = ['#5c7a6e','#a8c5bb','#f9c74f','#f8961e','#f94144','#90be6d','#43aa8b','#fff'];
   for (let i = 0; i < 80; i++) {
     const p = document.createElement('div'); p.className = 'confetti-piece';
     const size = 7 + Math.random() * 9;
-    p.style.cssText = `left:${Math.random() * 100}%;width:${size}px;height:${size * (0.4 + Math.random())}px;
-      background:${colors[Math.floor(Math.random() * colors.length)]};
-      border-radius:${Math.random() > .5 ? '50%' : '2px'};
-      animation-duration:${1.4 + Math.random() * 1.8}s;
-      animation-delay:${Math.random() * 0.6}s;`;
+    p.style.cssText = `left:${Math.random()*100}%;width:${size}px;height:${size*(0.4+Math.random())}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      border-radius:${Math.random()>.5?'50%':'2px'};
+      animation-duration:${1.4+Math.random()*1.8}s;
+      animation-delay:${Math.random()*0.6}s;`;
     wrap.appendChild(p);
   }
   setTimeout(() => wrap.remove(), 3500);
 }
-
 function flashScreen() {
   const f = document.createElement('div'); f.className = 'stamp-flash';
   document.body.appendChild(f); setTimeout(() => f.remove(), 600);
@@ -574,6 +666,7 @@ document.getElementById('tab-custom').addEventListener('click', e => showTab('cu
 
 // --- INIT ---
 startNewSet();
+showLoginModal();
 </script>
 </body>
 </html>
