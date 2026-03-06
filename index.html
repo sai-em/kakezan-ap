@@ -256,7 +256,7 @@
     <p class="sub">ニックネームと4けたのあんごうを いれてね</p>
     <div class="login-tabs">
       <button class="login-tab active" id="tabRegister">はじめて</button>
-      <button class="login-tab" id="tabLogin">もどる</button>
+      <button class="login-tab" id="tabLogin">ログイン</button>
     </div>
     <form onsubmit="return false">
       <div class="login-field">
@@ -314,10 +314,6 @@
     </div>
     <div class="s-bar-bg"><div class="s-bar-fill" id="sBar" style="width:0%"></div></div>
     <div class="stamp-grid" id="stampGrid"></div>
-    <div class="score-display" id="scoreDisplay">
-      <span id="scoreCorrect">0</span><span class="score-sep">/</span><span id="scoreTotal">0</span>
-      <span class="score-label">もんせいかい</span>
-    </div>
     <div class="save-status" id="saveStatus"></div>
   </div>
 </div>
@@ -379,6 +375,7 @@ let stamps = 0, customSrc = null, qNum = 0, correctAns = 0, answered = false;
 let currentUserId = null, currentUserName = null;
 let isRegisterMode = true;
 let scoreCorrect = 0, scoreTotal = 0;
+let scoreHistory = []; // [{correct, total}] スタンプごとの得点履歴
 
 // --- LOGIN UI ---
 function showLoginModal() {
@@ -397,11 +394,11 @@ document.getElementById('tabRegister').addEventListener('click', () => {
   document.getElementById('loginSubmit').textContent = 'はじめる！';
   document.getElementById('loginError').textContent = '';
 });
-document.getElementById('tabLogin').addEventListener('click', () => {
+  document.getElementById('tabLogin').addEventListener('click', () => {
   isRegisterMode = false;
   document.getElementById('tabLogin').classList.add('active');
   document.getElementById('tabRegister').classList.remove('active');
-  document.getElementById('loginSubmit').textContent = 'もどる！';
+  document.getElementById('loginSubmit').textContent = 'ログイン！';
   document.getElementById('loginError').textContent = '';
 });
 
@@ -435,7 +432,7 @@ async function handleLogin() {
   } catch(e) { errEl.textContent = 'エラーがおきたよ。もういちどためしてね'; console.error(e); }
 }
 
-function loginSuccess(uid, name, s, cs) {
+function loginSuccess(uid, name, s, cs, sh) {
   currentUserId = uid;
   currentUserName = name;
   stamps = s;
@@ -473,7 +470,7 @@ async function saveUserData() {
   setSaveStatus('saving');
   try {
     await db.collection('users').doc(currentUserId).update({
-      stamps, customStampUrl: customSrc || null
+      stamps, customStampUrl: customSrc || null, scoreHistory
     });
     setSaveStatus('saved');
   } catch(e) { setSaveStatus('error'); console.error(e); }
@@ -529,6 +526,8 @@ function startNewSet() { qNum = 0; scoreCorrect = 0; scoreTotal = 0; updateScore
 function nextQuestion() {
   if (qNum >= TOTAL_Q) {
     stamps = Math.min(stamps + 1, 20);
+    scoreHistory = scoreHistory.slice(-19); // 最大20件保持
+    scoreHistory.push({ correct: scoreCorrect, total: scoreTotal });
     saveUserData();
     renderStamps();
     flashScreen(); launchConfetti();
@@ -611,11 +610,26 @@ function renderStamps() {
     const cell = document.createElement('div');
     cell.className = 'stamp-cell' + (i < stamps ? ' filled' : '');
     if (i < stamps) {
+      const inner = document.createElement('div');
+      inner.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;gap:2px;';
       if (customSrc) {
-        const img = document.createElement('img'); img.src = customSrc; cell.appendChild(img);
+        const img = document.createElement('img');
+        img.src = customSrc;
+        img.style.cssText = 'width:65%;height:65%;object-fit:cover;border-radius:6px;';
+        inner.appendChild(img);
       } else {
-        cell.innerHTML = '<i class="fa-solid fa-star" style="color:var(--g1)"></i>';
+        const star = document.createElement('i');
+        star.className = 'fa-solid fa-star';
+        star.style.cssText = 'color:var(--g1);font-size:1rem;';
+        inner.appendChild(star);
       }
+      if (scoreHistory[i]) {
+        const sc = document.createElement('span');
+        sc.style.cssText = 'font-size:0.48rem;font-weight:800;color:var(--g1);letter-spacing:0;line-height:1;';
+        sc.textContent = `${scoreHistory[i].correct}/${scoreHistory[i].total}`;
+        inner.appendChild(sc);
+      }
+      cell.appendChild(inner);
     }
     grid.appendChild(cell);
   }
