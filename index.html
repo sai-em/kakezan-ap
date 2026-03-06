@@ -222,6 +222,14 @@
   .mini-confetti-piece { position: fixed; pointer-events: none; z-index: 96; width: 7px; height: 7px; border-radius: 2px; animation: miniFall linear forwards; }
   @keyframes miniFall { 0%{opacity:1} 100%{opacity:0;transform:translate(var(--tx),var(--ty)) rotate(540deg)} }
 
+  .score-display {
+    display: flex; align-items: baseline; justify-content: center;
+    gap: 4px; margin-top: 16px;
+    font-size: 2rem; font-weight: 900; color: var(--g1);
+  }
+  .score-sep { color: var(--g3); font-size: 1.4rem; }
+  .score-label { font-size: 0.72rem; font-weight: 700; color: var(--muted); letter-spacing: .06em; margin-left: 4px; align-self: center; }
+
   .save-status { text-align: center; font-size: 0.7rem; color: var(--muted); margin-top: 10px; min-height: 16px; }
 </style>
 </head>
@@ -250,16 +258,18 @@
       <button class="login-tab active" id="tabRegister">はじめて</button>
       <button class="login-tab" id="tabLogin">もどる</button>
     </div>
-    <div class="login-field">
-      <label>ニックネーム</label>
-      <input type="text" id="inputName" placeholder="たろう" maxlength="10">
-    </div>
-    <div class="login-field">
-      <label>4けたのあんごう</label>
-      <input type="password" id="inputPin" placeholder="0000" maxlength="4" inputmode="numeric">
-    </div>
-    <div class="login-error" id="loginError"></div>
-    <button class="login-submit" id="loginSubmit">はじめる！</button>
+    <form onsubmit="return false">
+      <div class="login-field">
+        <label>ニックネーム</label>
+        <input type="text" id="inputName" placeholder="たろう" maxlength="10" autocomplete="username">
+      </div>
+      <div class="login-field">
+        <label>4けたのあんごう</label>
+        <input type="password" id="inputPin" placeholder="0000" maxlength="4" inputmode="numeric" autocomplete="current-password">
+      </div>
+      <div class="login-error" id="loginError"></div>
+      <button class="login-submit" id="loginSubmit">はじめる！</button>
+    </form>
   </div>
 </div>
 
@@ -274,7 +284,7 @@
 <div class="panel active" id="panel-quiz">
   <div class="card">
     <div class="dan-row">
-      <label>DAN</label>
+      <label>モード</label>
       <select id="danSelect">
         <option value="0">ランダム 1〜9</option>
         <option value="1">1のだん</option><option value="2">2のだん</option>
@@ -304,6 +314,10 @@
     </div>
     <div class="s-bar-bg"><div class="s-bar-fill" id="sBar" style="width:0%"></div></div>
     <div class="stamp-grid" id="stampGrid"></div>
+    <div class="score-display" id="scoreDisplay">
+      <span id="scoreCorrect">0</span><span class="score-sep">/</span><span id="scoreTotal">0</span>
+      <span class="score-label">もんせいかい</span>
+    </div>
     <div class="save-status" id="saveStatus"></div>
   </div>
 </div>
@@ -364,6 +378,7 @@ const TOTAL_Q = 30;
 let stamps = 0, customSrc = null, qNum = 0, correctAns = 0, answered = false;
 let currentUserId = null, currentUserName = null;
 let isRegisterMode = true;
+let scoreCorrect = 0, scoreTotal = 0;
 
 // --- LOGIN UI ---
 function showLoginModal() {
@@ -482,7 +497,10 @@ function compressImage(file, maxSize = 400) {
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);
-        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         resolve(canvas.toDataURL('image/jpeg', 0.7));
       };
       img.src = ev.target.result;
@@ -506,7 +524,7 @@ document.getElementById('resetStampBtn').addEventListener('click', async () => {
 
 // --- QUIZ ---
 function rnd(n) { return Math.floor(Math.random() * n) + 1; }
-function startNewSet() { qNum = 0; nextQuestion(); }
+function startNewSet() { qNum = 0; scoreCorrect = 0; scoreTotal = 0; updateScore(); nextQuestion(); }
 
 function nextQuestion() {
   if (qNum >= TOTAL_Q) {
@@ -558,6 +576,7 @@ function answer(btn, val) {
     btn.classList.add('correct');
     fb.textContent = '正解！'; fb.className = 'feedback ok';
     miniCorrectEffect(btn);
+    scoreCorrect++;
   } else {
     btn.classList.add('wrong');
     document.querySelectorAll('.choice-btn').forEach(b => {
@@ -566,6 +585,13 @@ function answer(btn, val) {
     fb.textContent = `こたえは ${correctAns} だよ`; fb.className = 'feedback ng';
   }
   document.getElementById('nextBtn').style.display = 'block';
+  scoreTotal++;
+  updateScore();
+}
+
+function updateScore() {
+  document.getElementById('scoreCorrect').textContent = scoreCorrect;
+  document.getElementById('scoreTotal').textContent = scoreTotal;
 }
 
 // --- TABS ---
